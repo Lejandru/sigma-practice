@@ -1,0 +1,32 @@
+title: Domain Admins Group Enumeration via net.exe
+id: 13247e8a-5061-4024-a336-598811f0acb2
+status: experimental
+description: |
+  `net group "Domain Admins" /domain` lists everyone in the group. Attackers
+  run it as soon as they have a foothold to figure out who they're trying
+  to become. Shows up in pretty much every AD intrusion writeup I've read.
+references:
+  - https://attack.mitre.org/techniques/T1069/002/
+author: Lee
+date: 2026-04-29
+tags:
+  - attack.discovery
+  - attack.t1069.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+      - '\net.exe'
+      - '\net1.exe'
+  selection_args:
+    CommandLine|contains|all:
+      - 'group'
+      - 'Domain Admins'
+  condition: selection_image and selection_args
+falsepositives:
+  - Domain admins legitimately checking group membership themselves.
+  - Audit or inventory scripts that pull privileged groups on a schedule.
+  - Non-English Windows uses localized group names (Administrateurs du domaine in French) so this rule will miss them.
+level: medium
